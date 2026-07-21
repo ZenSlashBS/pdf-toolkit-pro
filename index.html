@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDF Toolkit Pro — Free Online PDF & Document Tools</title>
-<meta name="description" content="58+ free PDF and document tools that run 100% in your browser. Merge, split, compress, convert, OCR — your files never leave your device.">
+<meta name="description" content="59+ free PDF and document tools that run 100% in your browser. Merge, split, compress, convert, OCR — your files never leave your device.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -16,12 +19,13 @@
       <p class="tag">Every tool runs in your browser — your files never leave your device</p>
     </div>
   </div>
-  <input id="search" type="search" placeholder="Search tools… (merge, compress, word, ocr…)">
+  <input id="search" type="search" placeholder="Search tools… (merge, compress, word, ocr…)" autocomplete="off">
 </header>
 <nav id="cats"></nav>
 <div class="meta-row"><span id="count"></span><span class="badge">100% client-side · No uploads · No file size limits · Free forever</span></div>
 <main id="grid"></main>
 <div id="modal" class="hidden"><div id="modal-box"></div></div>
+<div id="toast"></div>
 <footer><p>PDF Toolkit Pro — open source & privacy-first. Powered by pdf-lib, PDF.js, jsPDF, Mammoth, SheetJS, JSZip and Tesseract.js.</p></footer>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
