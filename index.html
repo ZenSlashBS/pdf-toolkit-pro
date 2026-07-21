@@ -3,30 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF Toolkit Pro — Free Online PDF & Document Tools</title>
-<meta name="description" content="59+ free PDF and document tools that run 100% in your browser. Merge, split, compress, convert, OCR — your files never leave your device.">
+<title>PDF Toolkit Pro — The Complete PDF & Document Suite</title>
+<meta name="description" content="A premium PDF and document suite — 59 tools for converting, compressing, editing and organizing PDFs, Word, Excel and images. 100% private, runs entirely in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<header>
-  <div class="brand">
-    <span class="logo">📄</span>
-    <div>
-      <h1>PDF Toolkit <em>Pro</em></h1>
-      <p class="tag">Every tool runs in your browser — your files never leave your device</p>
-    </div>
+
+<nav class="topnav">
+  <div class="navbrand">
+    <span class="mark">📄</span>
+    <span class="brandname">PDF Toolkit<span class="pro">PRO</span></span>
   </div>
-  <input id="search" type="search" placeholder="Search tools… (merge, compress, word, ocr…)" autocomplete="off">
+  <div class="navlinks">
+    <a href="#features">Convert</a>
+    <a href="#suite">All Tools</a>
+    <a href="#trust">Why Us</a>
+  </div>
+  <a href="#suite" class="navcta">Open Suite</a>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow"><span class="dot"></span> 59 tools · zero uploads · 100% private</div>
+  <h1>The complete <em>PDF & document suite</em>,<br>without the subscription.</h1>
+  <p class="sub">Convert, compress, merge, edit and OCR PDFs, Word, Excel and images — all processed locally in your browser. Nothing you upload ever touches a server.</p>
+  <div class="herobtns">
+    <a href="#suite" class="btn btn-primary">Open the Suite →</a>
+    <a href="#features" class="btn btn-ghost">See what it can do</a>
+  </div>
+  <div class="trustrow">
+    <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> No file size limits</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Works offline after load</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Free forever</span>
+  </div>
 </header>
-<nav id="cats"></nav>
-<div class="meta-row"><span id="count"></span><span class="badge">100% client-side · No uploads · No file size limits · Free forever</span></div>
-<main id="grid"></main>
+
+<section id="features" class="alt">
+  <div class="wrap">
+    <div class="sectionhead">
+      <div>
+        <h2>Built for mass conversion</h2>
+        <p>The tools people reach for most — one click away.</p>
+      </div>
+    </div>
+    <div class="featgrid" id="featured"></div>
+  </div>
+</section>
+
+<section id="suite">
+  <div class="wrap">
+    <div class="sectionhead">
+      <div>
+        <h2>The full suite</h2>
+        <p>Every tool, organized by what you're trying to do.</p>
+      </div>
+    </div>
+    <div class="tabsrow">
+      <nav id="cats"></nav>
+      <input id="search" type="search" placeholder="Search tools…" autocomplete="off">
+    </div>
+    <div class="meta-row"><span id="count"></span><span class="badge">100% client-side · No uploads · No limits</span></div>
+    <main id="grid"></main>
+  </div>
+</section>
+
 <div id="modal" class="hidden"><div id="modal-box"></div></div>
 <div id="toast"></div>
-<footer><p>PDF Toolkit Pro — open source & privacy-first. Powered by pdf-lib, PDF.js, jsPDF, Mammoth, SheetJS, JSZip and Tesseract.js.</p></footer>
+
+<footer id="trust">
+  <div class="footgrid">
+    <div class="footbrand">
+      <div class="navbrand"><span class="mark">📄</span><span class="brandname">PDF Toolkit<span class="pro">PRO</span></span></div>
+      <p>A privacy-first document suite. Every conversion, edit and OCR job runs on your device — your files are never uploaded anywhere.</p>
+    </div>
+    <div class="footcol">
+      <h4>Convert</h4>
+      <a href="#suite">PDF to Word</a>
+      <a href="#suite">Word to PDF</a>
+      <a href="#suite">PDF to Excel</a>
+      <a href="#suite">Images to PDF</a>
+    </div>
+    <div class="footcol">
+      <h4>Organize</h4>
+      <a href="#suite">Merge PDFs</a>
+      <a href="#suite">Split PDF</a>
+      <a href="#suite">Compress PDF</a>
+      <a href="#suite">OCR scanned PDF</a>
+    </div>
+    <div class="footcol">
+      <h4>Built with</h4>
+      <a href="https://github.com/Hopding/pdf-lib">pdf-lib</a>
+      <a href="https://github.com/mozilla/pdf.js">PDF.js</a>
+      <a href="https://github.com/naptha/tesseract.js">Tesseract.js</a>
+      <a href="https://github.com/ZenSlashBS/pdf-toolkit-pro">Source on GitHub</a>
+    </div>
+  </div>
+  <div class="footbar">
+    <span>© 2026 PDF Toolkit Pro — open source, MIT licensed.</span>
+    <span>Made for people who process a lot of PDFs.</span>
+  </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
