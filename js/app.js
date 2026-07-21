@@ -16,6 +16,7 @@ T.download = function(data, name, mime){
   a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 10000);
+  toast('Download started: '+name, 'ok');
 };
 
 const _loaded = {};
@@ -52,20 +53,21 @@ T.renderPdf = async function(file, scale, status){
   const pdf = await T.pdfjs().getDocument({data: await file.arrayBuffer()}).promise;
   const out = [];
   for(let i=1;i<=pdf.numPages;i++){
-    if(status) status('Processing page '+i+' of '+pdf.numPages+'…');
+    if(status) status('Rendering page '+i+' of '+pdf.numPages+'…', {pct: (i-1)/pdf.numPages*100});
     const page = await pdf.getPage(i);
     const vp = page.getViewport({scale: scale||1.5});
     const c = document.createElement('canvas'); c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
     await page.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
     out.push(c);
   }
+  if(status) status('Finalizing…', {pct: 100});
   return out;
 };
 T.pdfText = async function(file, status){
   const pdf = await T.pdfjs().getDocument({data: await file.arrayBuffer()}).promise;
   const pages = [];
   for(let i=1;i<=pdf.numPages;i++){
-    if(status) status('Reading page '+i+' of '+pdf.numPages+'…');
+    if(status) status('Reading page '+i+' of '+pdf.numPages+'…', {pct: (i-1)/pdf.numPages*100});
     const tc = await (await pdf.getPage(i)).getTextContent();
     const lines = []; let line = '', lastY = null;
     tc.items.forEach(it=>{
@@ -76,6 +78,7 @@ T.pdfText = async function(file, status){
     lines.push(line.trimEnd());
     pages.push(lines.join('\n'));
   }
+  if(status) status('Finalizing…', {pct: 100});
   return pages;
 };
 T.canvasesToPdf = async function(canvases, quality, scale){
@@ -113,44 +116,80 @@ T.printHtml = function(html, title){
   setTimeout(()=>w.print(), 600);
 };
 
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg, kind){
+  const el = document.getElementById('toast'); if(!el) return;
+  el.textContent = msg;
+  el.className = kind||'';
+  requestAnimationFrame(()=>el.classList.add('show'));
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>el.classList.remove('show'), 3000);
+}
+T.toast = toast;
+
 /* ---------- UI ---------- */
 let activeCat = 'All';
 function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
 
 function renderCats(){
   const nav = document.getElementById('cats'); nav.innerHTML='';
-  ['All'].concat(T.cats).forEach(c=>{
+  ['All'].concat(T.cats).forEach((c,i)=>{
     const b = el('button', 'cat'+(c===activeCat?' active':''), c);
+    b.style.setProperty('--i', i);
     b.onclick = ()=>{ activeCat=c; renderCats(); renderGrid(); };
     nav.appendChild(b);
   });
 }
+
+function showSkeletons(grid, n){
+  for(let i=0;i<n;i++){
+    const s = el('div','skel','<div class="bar icon"></div><div class="bar t"></div><div class="bar d"></div><div class="bar d2"></div>');
+    s.style.setProperty('--i', i);
+    grid.appendChild(s);
+  }
+}
+
 function renderGrid(){
   const q = (document.getElementById('search').value||'').toLowerCase();
-  const grid = document.getElementById('grid'); grid.innerHTML='';
-  T.tools.forEach(t=>{
-    if(activeCat!=='All' && t.cat!==activeCat) return;
-    if(q && (t.name+' '+t.desc+' '+t.cat).toLowerCase().indexOf(q)<0) return;
-    const card = el('div','card','<div class="icon">'+t.icon+'</div><h3>'+T.esc(t.name)+'</h3><p>'+T.esc(t.desc)+'</p>');
-    card.onclick = ()=>openTool(t);
-    grid.appendChild(card);
-  });
-  document.getElementById('count').textContent = T.tools.length+' tools available';
+  const grid = document.getElementById('grid');
+  grid.innerHTML='';
+  // skeleton phase for the smooth feel
+  const matches = T.tools.filter(t=>
+    (activeCat==='All' || t.cat===activeCat) &&
+    (!q || (t.name+' '+t.desc+' '+t.cat).toLowerCase().indexOf(q)>=0)
+  );
+  showSkeletons(grid, Math.min(matches.length, 8));
+  setTimeout(()=>{
+    grid.innerHTML='';
+    matches.forEach((t,i)=>{
+      const card = el('div','card','<div class="icon">'+t.icon+'</div><h3>'+T.esc(t.name)+'</h3><p>'+T.esc(t.desc)+'</p>');
+      card.style.setProperty('--i', i);
+      card.onclick = ()=>openTool(t);
+      grid.appendChild(card);
+    });
+    document.getElementById('count').textContent = matches.length+' of '+T.tools.length+' tools';
+  }, 280);
 }
+
 function openTool(t){
   const m = document.getElementById('modal'), box = document.getElementById('modal-box');
   m.classList.remove('hidden');
+  requestAnimationFrame(()=>m.classList.add('show'));
   box.innerHTML = '';
   let files = [];
-  const close = el('button','close','\u00d7'); close.onclick = ()=>m.classList.add('hidden');
+  const close = el('button','close','\u00d7');
+  const closeModal = ()=>{ m.classList.remove('show'); setTimeout(()=>m.classList.add('hidden'), 220); };
+  close.onclick = closeModal;
   box.appendChild(close);
-  box.appendChild(el('h2', null, t.icon+' '+T.esc(t.name)));
+  const h2 = el('h2', null, '<span class="icon">'+t.icon+'</span><span>'+T.esc(t.name)+'</span>');
+  box.appendChild(h2);
   box.appendChild(el('p','tdesc', T.esc(t.desc)));
   const input = document.createElement('input');
   input.type = 'file'; input.hidden = true;
   if(t.accept) input.accept = t.accept;
   if(t.multiple) input.multiple = true;
-  const drop = el('div','drop','<strong>Click to choose file'+(t.multiple?'s':'')+'</strong><br>or drag & drop here');
+  const drop = el('div','drop','<span class="dicon">\ud83d\udcc1</span><strong>Click to choose file'+(t.multiple?'s':'')+'</strong><span class="dhint">or drag & drop here</span>');
   const flist = el('div','flist','');
   const setFiles = fl => { files = Array.from(fl); flist.innerHTML = files.map(f=>'<span class="chip">'+T.esc(f.name)+' <i>('+T.fmtSize(f.size)+')</i></span>').join(''); };
   drop.onclick = ()=>input.click();
@@ -178,26 +217,43 @@ function openTool(t){
   box.appendChild(optWrap);
   const run = el('button','run','Run \u2192');
   const st = el('div','status','');
-  const status = (msg, cls)=>{ st.textContent = msg; st.className = 'status '+(cls||''); };
-  box.appendChild(run); box.appendChild(st);
+  const prog = el('div','prog','<div class="fill"></div>');
+  const status = (msg, extra)=>{
+    st.textContent = msg;
+    st.className = 'status '+(extra && extra.kind ? extra.kind : 'working');
+    if(extra && typeof extra.pct==='number'){
+      prog.classList.add('show');
+      prog.querySelector('.fill').style.width = extra.pct+'%';
+      if(extra.pct>=100) setTimeout(()=>prog.classList.remove('show'), 800);
+    }
+  };
+  box.appendChild(run); box.appendChild(prog); box.appendChild(st);
   run.onclick = async ()=>{
-    if(!files.length){ status('Please choose a file first.','err'); return; }
-    run.disabled = true; status('Working\u2026');
+    if(!files.length){ status('Please choose a file first.', {kind:'err'}); toast('No file selected','err'); return; }
+    run.disabled = true;
+    run.innerHTML = '<span class="spin"></span>Processing…';
+    status('Working…', {pct: 0});
     try{
       const opts = {};
       (t.options||[]).forEach(o=>{ const e2 = box.querySelector('[data-k="'+o.key+'"]'); opts[o.key] = o.type==='number' ? parseFloat(e2.value) : e2.value; });
       const msg = await t.run(files, opts, status);
-      status(msg || 'Done — your download has started.', 'ok');
+      prog.querySelector('.fill').style.width = '100%';
+      status(msg || 'Done — your download has started.', {kind:'ok', pct: 100});
+      toast(msg || 'Done', 'ok');
     }catch(err){
-      status('\u26a0 '+(err && err.message ? err.message : err), 'err');
+      status('\u26a0 '+(err && err.message ? err.message : err), {kind:'err'});
+      toast(err && err.message ? err.message : 'Something went wrong', 'err');
     }
     run.disabled = false;
+    run.innerHTML = 'Run \u2192';
   };
 }
 
 T.init = function(){
   renderCats(); renderGrid();
-  document.getElementById('search').addEventListener('input', renderGrid);
-  document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') e.target.classList.add('hidden'); });
+  let st;
+  document.getElementById('search').addEventListener('input', ()=>{ clearTimeout(st); st = setTimeout(renderGrid, 120); });
+  document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal'){ e.target.classList.remove('show'); setTimeout(()=>e.target.classList.add('hidden'), 220); } });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !document.getElementById('modal').classList.contains('hidden')){ const m=document.getElementById('modal'); m.classList.remove('show'); setTimeout(()=>m.classList.add('hidden'), 220); } });
 };
 })();
